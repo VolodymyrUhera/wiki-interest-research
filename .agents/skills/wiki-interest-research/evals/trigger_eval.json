@@ -1,0 +1,22 @@
+[
+ {"query": "is interest in intermittent fasting growing among polish and czech readers? want to know before we translate our fasting app, and how much can i trust the trend", "should_trigger": true},
+ {"query": "We run an English-language online astronomy course. Which of these audiences should we localize for first: Ukrainian, Polish, Czech or Spanish speakers? Base it on some public data, not gut feeling.", "should_trigger": true},
+ {"query": "can you pull wikipedia pageviews for 'Stoicism' in German and French over the last 3 years and tell me if it's a fad or a real trend", "should_trigger": true},
+ {"query": "Чи зростає інтерес до астрономії серед україномовних читачів вікіпедії? Хочу запускати курс.", "should_trigger": true},
+ {"query": "my cofounder thinks sourdough baking peaked in 2020. can we check with actual numbers whether attention to it is still falling in spanish and portuguese speaking audiences?", "should_trigger": true},
+ {"query": "Which topic should our edtech startup build next for Turkish learners: Python programming, data science or machine learning? Compare how much public interest each gets in Turkish.", "should_trigger": true},
+ {"query": "I need a one-page PDF for my investors showing whether interest in electric bikes is rising in Dutch vs German, with some confidence level on the trend", "should_trigger": true},
+ {"query": "compare interest in chess between polish and ukrainian wikipedia, relative to how big each wiki is", "should_trigger": true},
+ {"query": "we saw a spike in signups from Czech users in January. was there a general surge of attention to dieting topics in Czech that month, per wikipedia traffic?", "should_trigger": true},
+ {"query": "Is the meditation trend real or just seasonal New Year hype? Look at Wikipedia readership in English and Italian and tell me how reliable the signal is.", "should_trigger": true},
+ {"query": "Please fix the citation formatting in the Wikipedia article draft I'm writing about the history of Lviv, it's in drafts/lviv.md", "should_trigger": false},
+ {"query": "summarize the wikipedia article on intermittent fasting for me in 5 bullet points, I need the health claims", "should_trigger": false},
+ {"query": "pull google trends data for 'ai agents' in the US vs UK for the last 12 months and plot it", "should_trigger": false},
+ {"query": "Our website analytics (GA4 export in data/ga4_sessions.csv) show traffic dropping 20% since March. Can you figure out which landing pages lost the most sessions?", "should_trigger": false},
+ {"query": "write a python script that downloads the full wikipedia dump for polish and extracts all article titles into a sqlite db", "should_trigger": false},
+ {"query": "translate our app's onboarding strings in locales/en.json into Polish and Czech", "should_trigger": false},
+ {"query": "what's the market size for language-learning apps in Brazil? need TAM/SAM numbers with sources for a pitch deck", "should_trigger": false},
+ {"query": "How many active editors does Ukrainian Wikipedia have, and how has the editor count changed since 2022?", "should_trigger": false},
+ {"query": "build me a small dashboard in React that shows our app's daily active users by country from the postgres table events", "should_trigger": false},
+ {"query": "which wikipedia language edition is the largest by number of articles? just a quick answer", "should_trigger": false}
+]

@@ -1,0 +1,69 @@
+{
+ "skill_name": "wiki-interest-research",
+ "evals": [
+  {
+   "id": 1,
+   "prompt": "Is interest in intermittent fasting growing among Polish- and Czech-language readers, and how much can we trust that trend? We're deciding whether to localize our fasting app.",
+   "expected_output": "Czech has an article, Polish has no linked intermittent-fasting article: reported as no data (not a niche), a broad 'Post' article not compared on size; trend judged against whole-wiki traffic and a control topic.",
+   "files": [],
+   "assertions": [
+    "Judges the trend against overall Wikipedia traffic change (normalization) before calling interest falling or growing",
+    "Uses a control or comparison topic from the same field (e.g. Dieting)",
+    "Handles the Polish article gap correctly: says there is no same-concept Polish article (or uses one only for trend), never presents the gap or a broad 'Post'/fasting article size as low interest or a niche/opportunity",
+    "Every number in the answer comes from fetched Wikimedia data or is explicitly labelled as outside knowledge (no invented or hand-derived figures like monthly totals or user estimates)",
+    "States a confidence/trust level with concrete reasons (e.g. volume, trend consistency, spikes)",
+    "Refers to language audiences, not countries/markets (no 'Poland market', no country flags)",
+    "Produces a shareable report file (PDF) and a chart in the outputs folder",
+    "Ends with a concrete way to validate (attention is not demand)"
+   ]
+  },
+  {
+   "id": 2,
+   "prompt": "We sell an English-language online astronomy course. Which should we localize for first: Ukrainian, Polish, Czech or Spanish readers? Use public data, and tell me how sure you are.",
+   "expected_output": "Ranking by relative interest normalized for wiki size plus momentum; explicit rule; ties respected.",
+   "files": [],
+   "assertions": [
+    "Ranks languages by interest relative to each wiki's size (e.g. per million pageviews), not by raw views",
+    "States the decision rule used to pick the first language",
+    "Treats differences under ~10% as ties instead of declaring a winner",
+    "Every number in the answer comes from fetched Wikimedia data or is explicitly labelled as outside knowledge (no invented or hand-derived figures like monthly totals or user estimates)",
+    "States a confidence/trust level with concrete reasons (e.g. volume, trend consistency, spikes)",
+    "Refers to language audiences, not countries/markets (no 'Poland market', no country flags)",
+    "Produces a shareable report file (PDF) and a chart in the outputs folder",
+    "Ends with a concrete way to validate (attention is not demand)"
+   ]
+  },
+  {
+   "id": 3,
+   "prompt": "Compare how much interest generative AI gets across English, Polish, Ukrainian and German readers, and which audience looks most promising.",
+   "expected_output": "German auto-linked article 'Generative künstliche Intelligenz' is a tiny stub (~4 views/day); agent notices, finds e.g. 'Generatives KI-Modell' or flags it, and does not call German readers uninterested.",
+   "files": [],
+   "assertions": [
+    "Notices the German generative-AI article is a stub/side page (tiny numbers) and flags it or finds a better German article",
+    "Does not conclude German readers have low interest / skip German based on the stub's numbers",
+    "Ranks by interest relative to wiki size, not raw views",
+    "Every number in the answer comes from fetched Wikimedia data or is explicitly labelled as outside knowledge (no invented or hand-derived figures like monthly totals or user estimates)",
+    "States a confidence/trust level with concrete reasons (e.g. volume, trend consistency, spikes)",
+    "Refers to language audiences, not countries/markets (no 'Poland market', no country flags)",
+    "Produces a shareable report file (PDF) and a chart in the outputs folder",
+    "Ends with a concrete way to validate (attention is not demand)"
+   ]
+  },
+  {
+   "id": 4,
+   "prompt": "Чи зростає інтерес до астрономії серед україномовних читачів? Наскільки можна довіряти цьому тренду?",
+   "expected_output": "Answer in Ukrainian; direction with normalization and a control topic (e.g. Physics); confidence with reasons; spikes not presented as trend.",
+   "files": [],
+   "assertions": [
+    "Answers in Ukrainian",
+    "Uses a control topic or whole-wiki normalization to judge the trend",
+    "Does not present a spike or seasonal peak as a trend",
+    "Every number in the answer comes from fetched Wikimedia data or is explicitly labelled as outside knowledge (no invented or hand-derived figures like monthly totals or user estimates)",
+    "States a confidence/trust level with concrete reasons (e.g. volume, trend consistency, spikes)",
+    "Refers to language audiences, not countries/markets (no 'Poland market', no country flags)",
+    "Produces a shareable report file (PDF) and a chart in the outputs folder",
+    "Ends with a concrete way to validate (attention is not demand)"
+   ]
+  }
+ ]
+}
