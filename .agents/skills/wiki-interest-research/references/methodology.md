@@ -25,7 +25,7 @@ Read this when the user asks "how confident is this", "why", or questions a numb
 | `window` | Growth compares the last k months with the first k months of the period, k = min(12, months/2). With k = 12 the windows are whole years, so seasonality cancels out. |
 | `growth_robust` ("Typical-day Δ") | Change in the **median** daily views between the windows. Main growth number: one viral day cannot move it. |
 | `growth_total` ("Total Δ") | Change in total views. It includes spikes, so it is the "naive" number. |
-| `growth_project` | Change in the whole wiki's traffic over the same windows. Many wikis are losing traffic (search answers, AI summaries). |
+| `growth_project` | Change in the whole wiki's total views over the same windows (printed as `WHOLE-WIKI TRAFFIC Δ`). Several wikis in recent studies lost traffic; possible reasons (search answers, AI summaries) are not in this data. |
 | `growth_normalized` ("vs wiki Δ") | `(1+growth_robust)/(1+growth_project) - 1`. Change in the topic's *share of attention* inside that language edition. Use it to compare languages. |
 | `trend_annual_rate`, `trend_r2` | Log-linear fit on monthly totals: annualized growth rate and how well a straight trend explains the data. |
 | `mann_kendall_p` ("Trend p") | Mann-Kendall test for a consistent monotonic monthly trend. p < 0.10 = consistent direction. |

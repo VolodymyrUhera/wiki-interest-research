@@ -143,6 +143,7 @@ def pdf(study, path):
     caveats += [f"{r['label']}: likely stub ({_size_cells(r)[1]} per 1M vs {med:.1f} median elsewhere), "
                 "excluded from rankings" for r, med in stubs(results)]
     caveats = caveats or ["No data-quality flags raised."]
+    caveats.insert(0, wiki_traffic_line(results))
     for i, c in enumerate(caveats):
         if y < 0.1:  # keep ~0.07 of the page for the method paragraph
             text(f"• {len(caveats) - i} more in results.json", size=7.5, color="dimgrey")
@@ -178,6 +179,8 @@ def markdown(study):
     lines += ["", "Details:"] + _md_table(HEADER, table_rows(study["results"]))
     lines += rankings(study["results"], study.get("rank_by", "relative"), study.get("controls", []))
     lines += control_checks(study["results"], study.get("controls", []))
+    lines += ["", wiki_traffic_line(study["results"]) + " (quote this instead of general claims about Wikipedia; "
+              "compare topics via vs wiki Δ, not against this)"]
     lines.append("")
     for r in study["results"]:
         m = r["metrics"]
@@ -214,6 +217,14 @@ def stubs(results):
         if others and ppm < STUB_RATIO * statistics.median(others):
             out.append((r, statistics.median(others)))
     return out
+
+
+def wiki_traffic_line(results):
+    """Each wiki's own change in total views over the same windows; 'n/a' where a whole-wiki month is missing."""
+    # All series of one language share dates and whole-wiki data, so any of them gives the same value.
+    wiki = {r["lang"]: r["metrics"].get("growth_project") for r in results}
+    cells = ", ".join(f"{lang} {'n/a' if g is None else _pct(g)}" for lang, g in sorted(wiki.items()))
+    return f"WHOLE-WIKI TRAFFIC Δ, total views: {cells or 'n/a'}"
 
 
 def control_checks(results, controls):
@@ -279,7 +290,7 @@ def tiers(rs, rank_by, name):
         f"  - {tier}: " + ("; ".join(items) if items else "none") for tier, items in out.items()]
 
 
-def _group_ranking(rs, title, name, rank_by):
+def _group_ranking(rs, title, name, rank_by, control=False):
     """Chains (ties explicit, not left to the reader's judgment) and tiers for one comparable group."""
     size = sorted(((name(r), r["metrics"]["share_ppm_last"]) for r in rs
                    if r["metrics"]["share_ppm_last"] is not None and not r.get("proxy")), key=lambda x: -x[1])
@@ -293,7 +304,9 @@ def _group_ranking(rs, title, name, rank_by):
                if len(size) > 1 else "not comparable"),
             "- momentum, vs wiki Δ: "
             + (_chain([(n, v, _pct(v)) for n, v in mom], lambda a, b: round(a - b, 2) <= 0.10)
-               if len(mom) > 1 else "not comparable")] + tiers(rs, rank_by, name)
+               if len(mom) > 1 else "not comparable")] + (
+        ["- (control topic: a yardstick for the topics above, not a candidate; no tiers)"] if control
+        else tiers(rs, rank_by, name))
 
 
 def rankings(results, rank_by="relative", controls=()):
@@ -307,7 +320,8 @@ def rankings(results, rank_by="relative", controls=()):
     lines = []
     for topic in dict.fromkeys(r["topic"] for r in results):
         rs = [r for r in results if r["topic"] == topic]
-        lines += _group_ranking(rs, f"of languages for {rs[0].get('name', topic)}", lambda r: r["lang"], rank_by)
+        lines += _group_ranking(rs, f"of languages for {rs[0].get('name', topic)}", lambda r: r["lang"], rank_by,
+                                control=topic in controls)
     candidates = [r for r in results if r["topic"] not in controls]
     if len({r["topic"] for r in candidates}) > 1:
         for lang in dict.fromkeys(r["lang"] for r in candidates):

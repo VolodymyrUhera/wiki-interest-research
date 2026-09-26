@@ -67,6 +67,23 @@ class CacheTest(unittest.TestCase):
         with mock.patch("urllib.request.urlopen", flaky), mock.patch("time.sleep"):
             self.assertEqual(wikiapi.get_json("https://example.org/t"), {"ok": 1})
 
+    def test_429_waits_for_retry_after(self):
+        import email.message
+        import urllib.error
+        headers = email.message.Message()
+        headers["Retry-After"] = "7"
+        replies = iter([urllib.error.HTTPError("u", 429, "slow down", headers, None), FakeResponse(b'{"ok": 1}')])
+
+        def throttled(req, timeout):
+            reply = next(replies)
+            if isinstance(reply, Exception):
+                raise reply
+            return reply
+
+        with mock.patch("urllib.request.urlopen", throttled), mock.patch("time.sleep") as sleep:
+            self.assertEqual(wikiapi.get_json("https://example.org/r"), {"ok": 1})
+        sleep.assert_called_once_with(7)
+
     def test_corrupt_or_old_format_entry_is_refetched(self):
         self.get(ttl=None)
         path = next(Path(self.tmp.name).glob("*.json"))
@@ -109,6 +126,17 @@ class CliTest(unittest.TestCase):
         for bad in ("Fizyka", "PL:Fizyka", "pl:"):
             with self.assertRaises(ValueError):
                 parse(bad, topics)
+
+    def test_sitelink_to_a_redirect_is_followed_to_the_article(self):
+        entity = {"entities": {"Q1": {"sitelinks": {"dewiki": {"title": "Generative künstliche Intelligenz"},
+                                                     "plwiki": {"title": "Generatywna sztuczna inteligencja"}},
+                                       "labels": {"en": {"value": "generative AI"}}}}}
+        redirects = {"Generative künstliche Intelligenz": "Generatives KI-Modell"}
+        with mock.patch.object(wikiapi, "get_json", return_value=entity), \
+                mock.patch.object(wikiapi, "wikipedia_sites", return_value={"de": "dewiki", "pl": "plwiki"}), \
+                mock.patch.object(wikiapi, "canonical", lambda lang, t: (redirects.get(t, t), "Q1")):
+            res = wikiapi.resolve("Q1", "en", ["de", "pl"])
+        self.assertEqual(res["titles"], {"de": "Generatives KI-Modell", "pl": "Generatywna sztuczna inteligencja"})
 
     def test_wikidata_site_ids(self):
         self.assertEqual(wikiapi.site_id("pl"), "plwiki")
@@ -223,6 +251,8 @@ class RankingFiltersTest(unittest.TestCase):
         self.assertNotIn("de 0.2", text)                  # stub is not ranked
         self.assertNotIn("Ranking of topics", text)       # only one candidate topic left
         self.assertIn("Ranking of languages for Physics", text)  # control still compared across languages
+        physics = text.split("Ranking of languages for Physics")[1]
+        self.assertNotIn("SUGGESTED TIERS", physics)            # ...but never recommended
 
     def test_control_check_spells_out_the_gap(self):
         import report
@@ -237,6 +267,13 @@ class RankingFiltersTest(unittest.TestCase):
             r["metrics"].update(growth_robust=-0.5, direction="declining")
         rows = report.answer_rows([p, a], ["Physics"])
         self.assertTrue(rows[-1][0].startswith("uk:Physics (control)"))
+
+    def test_wiki_traffic_line_shows_every_language_and_marks_missing(self):
+        import report
+        a = self.series("Astronomy", "uk", 9.9); a["metrics"]["growth_project"] = -0.25
+        b = self.series("Physics", "uk", 15.4); b["metrics"]["growth_project"] = -0.25
+        c = self.series("Astronomy", "cs", 8.7); c["metrics"]["growth_project"] = None
+        self.assertEqual(report.wiki_traffic_line([a, b, c]), "WHOLE-WIKI TRAFFIC Δ, total views: cs n/a, uk -25%")
 
     def test_missing_hint_names_the_topic(self):
         import report

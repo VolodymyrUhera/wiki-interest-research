@@ -9,12 +9,13 @@ wiki-interest-research/       ← the skill (self-contained; this README lives h
 ├── SKILL.md                  workflow, recipes, gotchas, answer template (~3k tokens)
 ├── scripts/
 │   ├── wiki_interest.py      CLI: resolve | search | study | report   (PEP 723 deps → `uv run`)
+│   ├── wiki_interest.py.lock exact dependency versions (uv script lock)
 │   ├── wikiapi.py            MediaWiki / Wikidata / Pageviews clients + on-disk cache
 │   ├── analysis.py           metrics, trust flags, confidence (pure, unit-tested)
 │   └── report.py             chart PNG, one-page PDF, Markdown summary, rankings
 ├── references/methodology.md metric definitions and limitations (loaded on demand)
 ├── tests/                    unit tests: metrics (synthetic series), cache, CLI parsing, tier rule
-├── evals/                    cheap-model eval harness, prompts, grading checks + history
+├── evals/                    Haiku eval harness, prompts, grading checks + history, with/without and trigger sets
 └── README.md                 this file: design, verification, roadmap
 ```
 
@@ -32,8 +33,8 @@ uv run --with "matplotlib>=3.8,<4" python -m unittest discover -s tests   # offl
 bash evals/run.sh                             # full scenarios on Claude Haiku 4.5 (needs the claude CLI)
 ```
 
-Requirements: `uv` (it installs `matplotlib` within the version range in the script header), or Python ≥ 3.10 with
-`pip install "matplotlib>=3.8,<4"`. No API keys needed. Wikimedia asks for contact info in the User-Agent:
+Requirements: `uv` (it installs the exact versions pinned in `scripts/wiki_interest.py.lock`), or Python ≥ 3.10
+with `pip install "matplotlib>=3.8,<4"`. No API keys needed. Wikimedia asks for contact info in the User-Agent:
 `export WIKI_UA="my-app/1.0 (me@example.com)"`. There are no compiled files.
 
 Each `study` writes `report.pdf` (one A4 page), `chart.png`, `results.json` (all metrics) and `series.csv`.
@@ -82,21 +83,32 @@ What the code does, and why:
 
 Known gap: Haiku sometimes still writes country names or flags for language editions (check 8).
 
-### Latest verification status (2026-09-26)
+### Latest verification (2026-09-26)
 
-The current checkout passes all **29 offline tests** and `skills-ref validate`. A fresh run of `study` for
-Ukrainian astronomy with Physics as a control, followed by `report` with Ukrainian findings, produced the
-chart, JSON, CSV and a visually checked one-page A4 PDF using cached Wikimedia responses.
+A second pass used AI reviewers and evals against each other, and every claim below was checked by rerunning:
 
-The earlier Haiku results above are historical evidence, not a verification of the latest `SKILL.md` wording.
-The final four with-skill cases in `evals/evals.json` and the serial trigger rerun are still pending: the
-Claude health check returned HTTP 429 (session limit, reset reported as 21:10 Europe/Warsaw). Failed API calls
-must be recorded as invalid runs, not skill-trigger misses. Keep the current description; the partial tuning
-results did not establish a better replacement. Rerun trigger evaluation with `--num-workers 1`.
+- **Audits.** Three independent AI audits ran: skill instructions against the code, a correctness audit with
+  about 150 edge cases, and the pageview calls against the
+  [Analytics API docs](https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/). Every finding was
+  reproduced before it was fixed. Fixes include: requests one at a time (API access policy), `Retry-After` on
+  HTTP 429, the MISSING hint naming its topic, `--control` topics never recommended, a false "spike-driven" flag
+  near ±10%, and new flags for new or mid-period articles.
+- **With vs without the skill** (Sonnet 5, 4 tasks × 2 runs, graded against pass/fail criteria written before
+  the runs, in `evals/evals.json`): 98% of checks passed with the skill vs 47% without, in about half the time.
+  The baseline runs also found a real bug: a Wikidata sitelink can point at a *redirect*. German "Generative
+  künstliche Intelligenz" redirects to "Generatives KI-Modell", so the skill measured 4 views/day instead of 66.
+  Sitelinks are now followed to the article. Two more rounds after fixes: 88%, then 91%, with stricter grading.
+- **Triggering** (`evals/trigger_eval.json`, 10 should-trigger and 10 near-miss prompts × 3 runs, run one at a
+  time): 30/30 triggered, 0/30 false triggers. Parallel runs gave misleading low numbers (timeouts counted
+  as misses).
+- **Full scenario on Claude Haiku 4.5** (`evals/run.sh`, the three task prompts, v11 in `evals/checks.md`): all
+  three answered with a PDF in 5–10 turns and $0.05–0.10 each. It surfaced one more skill bug, now fixed:
+  control topics printed SUGGESTED TIERS, and Haiku recommended audiences from a control row.
+- **Offline:** 32 unit tests pass, and `agentskills validate` passes.
 
-The previous handoff reported 33 unit tests; only 29 are present and discoverable in this checkout. The
-sitelink redirect fix is present, but the missing four tests have not been identified. The legacy
-`evals/run.sh` runs three prompts in parallel; use the four saved JSON cases sequentially for final validation.
+Known gaps (Haiku prose): it sometimes writes country flags or names for language editions, calls a flat +2%
+"the only growing one", or rewrites the ANSWER TABLE instead of pasting it. The script already prints the right
+words and tables; the remaining fix is a stricter answer check (see Roadmap).
 
 ## Roadmap: toward complex research and bigger data
 
@@ -116,7 +128,10 @@ change the skill until they pass.
 4. **Better denominators.** Wikimedia's pageviews-by-country dataset turns "language" into "country" where
    needed. Readers who use English Wikipedia instead of their own edition should be modeled. Speaker or
    internet-user counts could be added as a labeled outside source.
-5. **Triangulation.** Add other signals (Google Trends, edit activity, app-store and search data) behind the same
+5. **Answer checker.** A small script that checks the agent's final reply against `results.json` (pasted table,
+   no country names, flat words for |Δ| < 10%, every number present in the output) and asks for a rewrite on
+   failure. It turns the remaining prose gaps into a deterministic check.
+6. **Triangulation.** Add other signals (Google Trends, edit activity, app-store and search data) behind the same
    `study` interface, and flag disagreement between sources as a trust signal.
 6. **Research memory.** A `study.json` that records assumptions (criteria, proxies, period) across follow-ups, and a
    `diff` command ("what changed after adding German?"), so long multi-turn studies stay consistent.

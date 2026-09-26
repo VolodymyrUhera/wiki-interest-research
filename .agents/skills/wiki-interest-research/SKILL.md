@@ -44,7 +44,10 @@ the same article in every language. For a broad theme, choose the 1–2 most cen
 English" → "English language", "English as a second or foreign language"). When the question is "is this
 growing?", add a **control topic** from the same field with `--control` (Astronomy → Physics; Intermittent
 fasting → Dieting). The control shows whether a change is specific to the topic or affects the whole field. Pass it
-with `--control`, not `--topic`, so it never shows up as a candidate in topic tiers.
+with `--control`, not `--topic`, so it never shows up as a candidate in tiers. A control is a *different, broader*
+topic: never one of the articles that measure the topic itself (for "learning English", "English language" and
+"English as a second or foreign language" are both `--topic`; a control could be "Language education"). Recommend
+audiences only from topic rows, never from control rows.
 
 **Step 4 – MISSING and STUB?.**
 
@@ -99,7 +102,8 @@ The output starts with an **ANSWER TABLE** to paste into your reply, then a Deta
 
 Other lines: `- <series>: ... [redirects N%; spikes DATE (views)]` summary per series, with `flag:` sub-lines ·
 `*` after a label = proxy · `PROXY` / `STUB?` / `MISSING` = see Step 4 · `→ no clear leader` = top two tied ·
-`not comparable` / `n/a` = too little data (or whole-wiki traffic missing) for that number.
+`not comparable` / `n/a` = too little data (or whole-wiki traffic missing) for that number · `WHOLE-WIKI TRAFFIC Δ`
+= each wiki's own traffic change over the same windows.
 
 For metric definitions and confidence rules, read [references/methodology.md](references/methodology.md) when the
 user asks about method or trust, or when a number looks surprising.
@@ -118,9 +122,9 @@ These are mistakes seen in real runs:
   series, or estimate users or revenue ("886/day × 2% conversion = 600 users" is invented). Need another number?
   Read `results.json`.
 - **Explanations are hypotheses.** "Readers moved to Duolingo" is not in the data: write "possible reason:".
-- **Most wikis lost traffic in 2024–2026.** A raw decline is normal. Judge a topic by vs wiki Δ and by the control
-  topic before saying interest is falling. Why wikis lose traffic (AI answers, search changes) is not in this data:
-  if you mention it, write "possible reason:".
+- **A raw decline is often the whole wiki shrinking.** Judge a topic by vs wiki Δ and by the control topic before
+  saying interest is falling. For the wiki's own change, quote the `WHOLE-WIKI TRAFFIC Δ` line; do not generalize to
+  "most wikis". Why a wiki loses traffic (AI answers, search changes) is not in this data: write "possible reason:".
 - **A language is not a country or a market.** Say "Polish-language readers", not "Poland", and use no country
   flags. Spanish, Portuguese and English cover many countries, and many people read English Wikipedia instead of
   their own.
