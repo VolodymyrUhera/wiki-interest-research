@@ -1,3 +1,4 @@
 wiki-reports/
 __pycache__/
 .claude/wiki-interest-research-workspace/
+.ruff_cache/
